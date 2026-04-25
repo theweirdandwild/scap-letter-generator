@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Greenwashing Complaint Letter Generator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 620px; margin: 0 auto; }
+
+    .hero { padding-bottom: 1.5rem; border-bottom: 1px solid #e0e0db; margin-bottom: 2rem; }
+    .hero h1 { font-size: 22px; font-weight: 600; color: #085041; margin-bottom: 6px; }
+    .hero p { font-size: 14px; color: #555; line-height: 1.6; }
+
+    .step-indicator { display: flex; align-items: center; margin-bottom: 2rem; }
+    .step { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .step-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+    .step.done .step-num { background: #1D9E75; color: white; }
+    .step.active .step-num { background: #085041; color: white; }
+    .step.pending .step-num { background: #e8e8e4; color: #888; border: 1px solid #d0d0cc; }
+    .step-label { color: #888; }
+    .step.active .step-label { color: #1a1a1a; font-weight: 500; }
+    .step-line { height: 1px; flex: 1; background: #e0e0db; margin: 0 8px; min-width: 16px; }
+
+    .card { background: white; border: 1px solid #e0e0db; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+    .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #1a1a1a; }
+    .card .subtitle { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 1.25rem; }
+
+    .scap-item { border: 1px solid #e0e0db; border-radius: 8px; padding: 1rem; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; user-select: none; }
+    .scap-item:hover { border-color: #1D9E75; background: #f0faf6; }
+    .scap-item.checked { border-color: #1D9E75; background: #E1F5EE; }
+    .scap-item.checked .scap-num { background: #1D9E75; color: white; }
+    .scap-header { display: flex; align-items: flex-start; gap: 10px; }
+    .scap-num { width: 28px; height: 28px; border-radius: 50%; background: #e8e8e4; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #666; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; }
+    .scap-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #1a1a1a; }
+    .scap-text { font-size: 13px; line-height: 1.6; color: #666; }
+    .check-indicator { margin-left: auto; color: #1D9E75; font-size: 16px; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
+    .scap-item.checked .check-indicator { opacity: 1; }
+
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+    .btn-primary { background: #085041; color: white; border: none; }
+    .btn-primary:hover { background: #0F6E56; }
+    .btn-primary:disabled { background: #e0e0db; color: #aaa; cursor: not-allowed; }
+    .btn-secondary { background: transparent; color: #1a1a1a; border: 1px solid #ccc; }
+    .btn-secondary:hover { background: #f5f5f3; }
+    .btn-small { font-size: 12px; padding: 6px 14px; }
+    .btn-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
+
+    .letter-box { background: #f9f9f7; border-radius: 8px; padding: 1.25rem; font-size: 13px; line-height: 2; color: #1a1a1a; border: 1px solid #e0e0db; white-space: pre-wrap; }
+    .letter-fixed { color: #888; }
+
+    .hint { font-size: 12px; color: #888; }
+    .reset-btn { font-size: 12px; color: #888; background: none; border: none; cursor: pointer; text-decoration: underline; }
+    .reset-btn:hover { color: #1a1a1a; }
+
+    .asas-link { color: #0F6E56; text-decoration: none; }
+    .asas-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="hero">
+      <h1>Greenwashing complaint letter generator</h1>
+      <p>Spotted a potentially misleading environmental claim in an ad? Select the SCAP guidelines you think it violates and we'll draft a complaint letter for you to send to ASAS.</p>
+    </div>
+
+    <div class="step-indicator">
+      <div class="step active" id="si-1"><div class="step-num">1</div><span class="step-label">SCAP checklist</span></div>
+      <div class="step-line"></div>
+      <div class="step pending" id="si-2"><div class="step-num">2</div><span class="step-label">Your letter</span></div>
+    </div>
+
+    <div id="step1">
+      <div class="card">
+        <h3>SCAP guidelines checklist</h3>
+        <p class="subtitle">Select every guideline you think this ad violates. Each selection adds a paragraph to your complaint letter.</p>
+
+        <div class="scap-item" id="scap-1" onclick="toggleScap(1)">
+          <div class="scap-header">
+            <div class="scap-num">1</div>
+            <div>
+              <div class="scap-title">Unexplained or unqualified claims</div>
+              <div class="scap-text">The ad makes environmental claims without clearly explaining the basis for them, or leaves out significant information.</div>
+            </div>
+            <div class="check-indicator">✓</div>
+          </div>
+        </div>
+
+        <div class="scap-item" id="scap-2" onclick="toggleScap(2)">
+          <div class="scap-header">
+            <div class="scap-num">2</div>
+            <div>
+              <div class="scap-title">Absolute claims without convincing evidence</div>
+              <div class="scap-text">The ad uses absolute phrases like "environmentally friendly" or "wholly biodegradable" without proof.</div>
+            </div>
+            <div class="check-indicator">✓</div>
+          </div>
+        </div>
+
+        <div class="scap-item" id="scap-3" onclick="toggleScap(3)">
+          <div class="scap-header">
+            <div class="scap-num">3</div>
+            <div>
+              <div class="scap-title">Presenting contested claims as settled science</div>
+              <div class="scap-text">The ad presents disputed or inconclusive scientific claims as though they are universally accepted.</div>
+            </div>
+            <div class="check-indicator">✓</div>
+          </div>
+        </div>
+
+        <div class="scap-item" id="scap-4" onclick="toggleScap(4)">
+          <div class="scap-header">
+            <div class="scap-num">4</div>
+            <div>
+              <div class="scap-title">False "improved formula" implications</div>
+              <div class="scap-text">The ad implies the product was changed to be more environmentally safe, without evidence it was ever harmful.</div>
+            </div>
+            <div class="check-indicator">✓</div>
+          </div>
+        </div>
+
+        <div class="scap-item" id="scap-5" onclick="toggleScap(5)">
+          <div class="scap-header">
+            <div class="scap-num">5</div>
+            <div>
+              <div class="scap-title">Vague, extravagant or confusing language</div>
+              <div class="scap-text">The ad uses unclear, exaggerated or jargon-heavy language about its environmental impact.</div>
+            </div>
+            <div class="check-indicator">✓</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <span class="hint">Select at least one guideline to continue.</span>
+        <button class="btn btn-primary" id="step1-next" onclick="goToStep2()" disabled>Generate letter →</button>
+      </div>
+    </div>
+
+    <div id="step2" style="display:none">
+      <div class="card">
+        <h3>Your complaint letter</h3>
+        <p class="subtitle">Copy this letter and send it to ASAS at <a class="asas-link" href="mailto:asas@case.org.sg">asas@case.org.sg</a>.</p>
+        <div class="letter-box" id="letter-box"></div>
+        <div style="margin-top:10px;">
+          <button class="btn btn-secondary btn-small" onclick="copyLetter()">Copy letter</button>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+        <button class="reset-btn" onclick="resetAll()">Start over</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const SCAP_PARAGRAPHS = {
+      1: "The advertisement makes environmental claims without clearly explaining the basis for them which may give consumers a misleading impression of the product's environmental impact.",
+      2: "The advertisement uses absolute environmental claims without providing convincing evidence to support these assertions. This may mislead consumers into overestimating the product's environmental credentials.",
+      3: "The advertisement presents environmental claims as though they are universally accepted, when the underlying scientific evidence may be disputed which gives consumers a false picture of the level of scientific agreement on the claims being made.",
+      4: "The advertisement implies that the product has been improved to be more environmentally safe, when there is no clear evidence that the product previously caused environmental harm. This may mislead consumers into believing a greater environmental benefit than what is true.",
+      5: "The advertisement uses vague, exaggerated or unclear language when describing its environmental impact which can mislead consumers about the true environmental credentials of the product."
+    };
+
+    const LETTER_OPENING = "Dear Sir/Madam,\n\nI am writing to you today to seek clarification on whether this advertisement I spotted flouts ASAS's advertising practices as a form of greenwashing. These are the concerns that I have:";
+    const LETTER_CLOSING = "I would appreciate your guidance on whether this advertisement meets the standards set out in the Singapore Code of Advertising Practice.";
+
+    let checkedScap = new Set();
+    let letterText = '';
+
+    function goToStep(n) {
+      document.getElementById('step1').style.display = n === 1 ? 'block' : 'none';
+      document.getElementById('step2').style.display = n === 2 ? 'block' : 'none';
+      ['si-1','si-2'].forEach((id, i) => {
+        document.getElementById(id).className = 'step ' + (i+1 < n ? 'done' : i+1 === n ? 'active' : 'pending');
+      });
+    }
+
+    function toggleScap(n) {
+      const el = document.getElementById('scap-' + n);
+      if (checkedScap.has(n)) { checkedScap.delete(n); el.classList.remove('checked'); }
+      else { checkedScap.add(n); el.classList.add('checked'); }
+      document.getElementById('step1-next').disabled = checkedScap.size === 0;
+    }
+
+    function goToStep2() {
+      goToStep(2);
+      const paras = [...checkedScap].sort().map(n => SCAP_PARAGRAPHS[n]).join('\n\n');
+      letterText = LETTER_OPENING + '\n\n' + paras + '\n\n' + LETTER_CLOSING;
+      document.getElementById('letter-box').innerHTML =
+        '<span class="letter-fixed">' + LETTER_OPENING + '</span>\n\n' +
+        [...checkedScap].sort().map(n => SCAP_PARAGRAPHS[n]).join('\n\n') +
+        '\n\n<span class="letter-fixed">' + LETTER_CLOSING + '</span>';
+    }
+
+    function copyLetter() {
+      navigator.clipboard.writeText(letterText).then(() => {
+        const b = event.target; const o = b.textContent;
+        b.textContent = 'Copied!'; setTimeout(() => b.textContent = o, 1500);
+      });
+    }
+
+    function resetAll() {
+      checkedScap = new Set();
+      document.querySelectorAll('.scap-item').forEach(el => el.classList.remove('checked'));
+      document.getElementById('step1-next').disabled = true;
+      goToStep(1);
+    }
+  </script>
+</body>
+</html>
